@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Disponibilidade</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f6f8fd, #f0f2f5);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 350px;
+            margin: 10px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #00B4DB, #0083B0);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .instructions {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            margin: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 0.95rem;
+            color: #1565c0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid rgba(25, 118, 210, 0.1);
+        }
+
+        .admin-controls {
+            display: flex;
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-controls select {
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            font-size: 0.9rem;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+
+        .admin-controls select:hover {
+            border-color: #00B4DB;
+            box-shadow: 0 2px 8px rgba(0,180,219,0.1);
+        }
+
+        .calendar {
+            padding: 10px 8px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+            margin-top: 15px;
+        }
+
+        .weekday {
+            text-align: center;
+            padding: 5px 0;
+            font-weight: 500;
+            color: #666;
+            font-size: 0.7rem;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            min-width: 30px;
+            min-height: 30px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .day.available {
+            background: linear-gradient(135deg, #4CAF50, #43A047);
+            color: white;
+        }
+
+        .day.unavailable {
+            background: linear-gradient(135deg, #f44336, #e53935);
+            color: white;
+        }
+
+        .day::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.2);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .day:active::after {
+            opacity: 1;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            padding: 10px;
+            justify-content: center;
+        }
+
+        .actions button {
+            width: 100%;
+            margin: 5px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        #saveButton {
+            background: linear-gradient(135deg, #00B4DB, #0083B0);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,131,176,0.2);
+        }
+
+        #logoutButton {
+            background: linear-gradient(135deg, #ff4b4b, #e53935);
+            color: white;
+            box-shadow: 0 4px 15px rgba(229,57,53,0.2);
+        }
+
+        .actions button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 0;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .admin-controls {
+                flex-direction: column;
+            }
+
+            .admin-controls select {
+                width: 100%;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .actions button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .container {
+                padding: 5px;
+            }
+
+            .day {
+                min-width: 25px;
+                min-height: 25px;
+                font-size: 0.75rem;
+            }
+
+            .weekday {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Painel Administrativo</h1>
+            <p>Gerenciar Disponibilidade</p>
+        </div>
+
+        <div class="instructions">
+            <strong>Como usar:</strong> Clique nos dias para marcá-los como indisponíveis.
+            <br>
+            <span style="color: #4CAF50">Verde = Disponível</span> | 
+            <span style="color: #f44336">Vermelho = Indisponível</span>
+        </div>
+
+        <div class="admin-controls">
+            <select id="yearSelect">
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+            </select>
+            <select id="monthSelect">
+                <option value="0">Janeiro</option>
+                <option value="1">Fevereiro</option>
+                <option value="2">Março</option>
+                <option value="3">Abril</option>
+                <option value="4">Maio</option>
+                <option value="5">Junho</option>
+                <option value="6">Julho</option>
+                <option value="7">Agosto</option>
+                <option value="8">Setembro</option>
+                <option value="9">Outubro</option>
+                <option value="10">Novembro</option>
+                <option value="11">Dezembro</option>
+            </select>
+        </div>
+
+        <div class="calendar">
+            <div id="calendar" class="calendar-grid"></div>
+        </div>
+
+        <div class="actions">
+            <button id="saveButton">Salvar Alterações</button>
+            <button id="logoutButton">Sair</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+  apiKey: "AIzaSyCXhOMregdyHZ4tUiPxCPusEwdogEy2-zc",
+  authDomain: "ubatubaagenda-63175.firebaseapp.com",
+  databaseURL: "https://ubatubaagenda-63175-default-rtdb.firebaseio.com",
+  projectId: "ubatubaagenda-63175",
+  storageBucket: "ubatubaagenda-63175.firebasestorage.app",
+  messagingSenderId: "401493829446",
+  appId: "1:401493829446:web:0fa4283db79b67d9a2a747",
+  measurementId: "G-S26TLDG0E5"
+};
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const availabilityRef = database.ref('availability');
+
+        // Estado do calendário - agora guarda dias indisponíveis
+        let unavailableDates = new Set();
+        
+        // Gerar calendário
+        function generateCalendar(year, month) {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+
+            // Adicionar dias da semana
+            const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            weekdays.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'weekday';
+                dayElement.textContent = day;
+                calendar.appendChild(dayElement);
+            });
+
+            // Calcular dias do mês
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDate = new Date(year, month + 1, 0).getDate();
+
+            // Adicionar espaços vazios até o primeiro dia
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'day';
+                calendar.appendChild(emptyDay);
+            }
+
+            // Adicionar dias do mês
+            for (let i = 1; i <= lastDate; i++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'day';
+                dayElement.textContent = i;
+                dayElement.onclick = () => toggleDate(i);
+                
+                // Agora os dias começam disponíveis (verdes) por padrão
+                if (unavailableDates.has(i.toString())) {
+                    dayElement.classList.add('unavailable');
+                } else {
+                    dayElement.classList.add('available');
+                }
+                
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        // Alternar disponibilidade de uma data
+        function toggleDate(day) {
+            if (unavailableDates.has(day.toString())) {
+                unavailableDates.delete(day.toString());
+            } else {
+                unavailableDates.add(day.toString());
+            }
+            generateCalendar(
+                parseInt(yearSelect.value),
+                parseInt(monthSelect.value)
+            );
+        }
+
+        // Salvar alterações no Firebase
+        document.getElementById('saveButton').onclick = function() {
+            const year = yearSelect.value;
+            const month = monthSelect.value;
+            
+            const updates = {};
+            // Agora salvamos os dias indisponíveis
+            for (let i = 1; i <= 31; i++) {
+                updates[i] = !unavailableDates.has(i.toString());
+            }
+
+            availabilityRef.child(`${year}/${month}`).set(updates)
+                .then(() => alert('Alterações salvas com sucesso!'))
+                .catch(error => alert('Erro ao salvar: ' + error.message));
+        };
+
+        // Carregar dados existentes
+        function loadAvailability() {
+            const year = yearSelect.value;
+            const month = monthSelect.value;
+
+            availabilityRef.child(`${year}/${month}`).once('value')
+                .then((snapshot) => {
+                    unavailableDates.clear();
+                    const data = snapshot.val() || {};
+                    
+                    // Agora carregamos os dias indisponíveis
+                    Object.keys(data).forEach(date => {
+                        if (!data[date]) {
+                            unavailableDates.add(date);
+                        }
+                    });
+                    
+                    generateCalendar(parseInt(year), parseInt(month));
+                });
+        }
+
+        // Eventos de mudança nos selects
+        yearSelect.onchange = loadAvailability;
+        monthSelect.onchange = loadAvailability;
+
+        // Logout
+        document.getElementById('logoutButton').onclick = function() {
+            window.location.href = 'index.html';
+        };
+
+        // Inicializar calendário
+        loadAvailability();
+    </script>
+</body>
+</html> 

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disponibilidade - Apartamento Ubatuba</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f6f8fd, #f0f2f5);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 350px;
+            margin: 10px auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #00B4DB, #0083B0);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            margin-bottom: 0;
+            box-shadow: 0 4px 15px rgba(0, 131, 176, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.1) 50%, transparent 55%);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .header h1 {
+            font-size: 1.3rem;
+            margin-bottom: 3px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .calendar {
+            background: white;
+            border-radius: 0 0 15px 15px;
+            padding: 15px 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        .month-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .month-selector button {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: #f8f9fa;
+            font-size: 1rem;
+            color: #0083b0;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .month-selector button:hover {
+            background: #e3f2fd;
+            transform: scale(1.1);
+        }
+
+        .month-selector h2 {
+            font-size: 1rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            padding: 5px 0;
+        }
+
+        .weekday {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #666;
+            font-weight: 500;
+            padding: 5px 0;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .day:active {
+            transform: scale(0.95);
+        }
+
+        .available {
+            background: #4CAF50 !important;
+            color: white !important;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .unavailable {
+            background: #f44336 !important;
+            color: white !important;
+            border: 1px solid rgba(244, 67, 54, 0.2);
+        }
+
+        .legend {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px 0;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        /* Efeito de hover nos dias */
+        .day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Efeito de ripple ao clicar */
+        .day::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.3);
+            border-radius: 8px;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .day:active::after {
+            opacity: 1;
+            transform: scale(0);
+            transition: 0s;
+        }
+
+        /* Estilo do botão do WhatsApp */
+        .whatsapp-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #25D366;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            margin: 20px auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+            max-width: 280px;
+        }
+
+        .whatsapp-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 211, 102, 0.3);
+            background: #22c35e;
+        }
+
+        .whatsapp-button img {
+            width: 24px;
+            height: 24px;
+        }
+
+        @media (max-width: 360px) {
+            .whatsapp-button {
+                font-size: 0.9rem;
+                padding: 10px 20px;
+            }
+
+            .whatsapp-button img {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Disponibilidade</h1>
+            <p>Apartamento em Ubatuba</p>
+        </div>
+
+        <div class="calendar">
+            <div class="month-selector">
+                <button>&lt;</button>
+                <h2>Junho 2024</h2>
+                <button>&gt;</button>
+            </div>
+
+            <div class="calendar-grid">
+                <div class="weekday">Dom</div>
+                <div class="weekday">Seg</div>
+                <div class="weekday">Ter</div>
+                <div class="weekday">Qua</div>
+                <div class="weekday">Qui</div>
+                <div class="weekday">Sex</div>
+                <div class="weekday">Sáb</div>
+
+                <!-- Dias do calendário serão inseridos via JavaScript -->
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4CAF50;"></div>
+                    <span>Disponível para Reserva</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f44336;"></div>
+                    <span>Indisponível</span>
+                </div>
+            </div>
+        </div>
+
+        <a href="https://wa.me/5514997122080?text=Olá!%20queria%20saber%20se%20você%20tem%20disponibilidade%20para%20o%20dia:%20" 
+           class="whatsapp-button" 
+           target="_blank">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/767px-WhatsApp.svg.png" alt="WhatsApp">
+            Reservar pelo WhatsApp
+        </a>
+    </div>
+
+    <footer>
+        <p class="developer-link">Desenvolvido por <a href="#" id="adminLink">Jeff Kevyn</a></p>
+    </footer>
+
+    <!-- Modal de Login -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Login Administrativo</h2>
+            <input type="password" id="adminPassword" placeholder="Senha">
+            <button id="loginButton">Entrar</button>
+        </div>
+    </div>
+
+    <style>
+        /* Estilos do Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .developer-link a {
+            color: #0083b0;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .developer-link a:hover {
+            color: #00B4DB;
+        }
+
+        /* Estilos do Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 300px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .close {
+            float: right;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .modal button {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #00B4DB, #0083B0);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+
+    <script>
+        // Configuração do Firebase
+     // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+     const firebaseConfig = {
+  apiKey: "AIzaSyCXhOMregdyHZ4tUiPxCPusEwdogEy2-zc",
+  authDomain: "ubatubaagenda-63175.firebaseapp.com",
+  databaseURL: "https://ubatubaagenda-63175-default-rtdb.firebaseio.com",
+  projectId: "ubatubaagenda-63175",
+  storageBucket: "ubatubaagenda-63175.firebasestorage.app",
+  messagingSenderId: "401493829446",
+  appId: "1:401493829446:web:0fa4283db79b67d9a2a747",
+  measurementId: "G-S26TLDG0E5"
+};
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Referência para os dados de disponibilidade
+        const availabilityRef = database.ref('availability');
+
+        // Configuração inicial do calendário
+        let currentDate = new Date(2024, 10); // Novembro é mês 10 (0-11)
+        const endDate = new Date(2025, 11); // Dezembro/2025
+
+        // Função para formatar o nome do mês e ano
+        function formatMonthYear(date) {
+            const months = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            return `${months[date.getMonth()]} ${date.getFullYear()}`;
+        }
+
+        // Função para navegar entre os meses
+        function navigateMonth(direction) {
+            const newDate = new Date(currentDate);
+            newDate.setMonth(currentDate.getMonth() + direction);
+
+            // Verificar se está dentro do período permitido
+            if (newDate >= new Date(2024, 10) && newDate <= endDate) {
+                currentDate = newDate;
+                document.querySelector('.month-selector h2').textContent = formatMonthYear(currentDate);
+                loadAvailability(currentDate.getFullYear(), currentDate.getMonth());
+            }
+        }
+
+        // Adicionar eventos aos botões de navegação
+        document.querySelectorAll('.month-selector button').forEach((button, index) => {
+            button.onclick = () => navigateMonth(index === 0 ? -1 : 1);
+        });
+
+        // Atualizar texto inicial do mês
+        document.querySelector('.month-selector h2').textContent = formatMonthYear(currentDate);
+
+        // Função para gerar o calendário
+        function generateCalendar(year, month, unavailableDays) {
+            const calendar = document.querySelector('.calendar-grid');
+            calendar.innerHTML = '';
+
+            // Adicionar cabeçalho dos dias da semana
+            const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            weekdays.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'weekday';
+                dayElement.textContent = day;
+                calendar.appendChild(dayElement);
+            });
+
+            // Calcular primeiro dia do mês e total de dias
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDate = new Date(year, month + 1, 0).getDate();
+
+            // Adicionar espaços vazios até o primeiro dia
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'day';
+                calendar.appendChild(emptyDay);
+            }
+
+            // Adicionar os dias do mês
+            for (let i = 1; i <= lastDate; i++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'day';
+                dayElement.textContent = i;
+                
+                // Por padrão, dias são disponíveis (verdes)
+                // Apenas se estiver explicitamente marcado como indisponível, fica vermelho
+                if (unavailableDays && unavailableDays[i] === false) {
+                    dayElement.classList.add('unavailable');
+                } else {
+                    dayElement.classList.add('available');
+                }
+                
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        // Atualizar função loadAvailability
+        function loadAvailability(year, month) {
+            availabilityRef.child(`${year}/${month}`).once('value')
+                .then((snapshot) => {
+                    const availability = snapshot.val() || {};
+                    generateCalendar(year, month, availability);
+                })
+                .catch((error) => {
+                    console.error("Erro ao carregar disponibilidade:", error);
+                    // Se houver erro, mostrar todos os dias como disponíveis
+                    generateCalendar(year, month, {});
+                });
+        }
+
+        // Carregar calendário inicial
+        loadAvailability(currentDate.getFullYear(), currentDate.getMonth());
+
+        // Modal e Login
+        const modal = document.getElementById('adminModal');
+        const adminLink = document.getElementById('adminLink');
+        const closeBtn = document.querySelector('.close');
+        const loginButton = document.getElementById('loginButton');
+
+        adminLink.onclick = function(e) {
+            e.preventDefault();
+            modal.style.display = 'block';
+        }
+
+        closeBtn.onclick = function() {
+            modal.style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        window.onclick = function(e) {
+            if (e.target == modal) {
+                modal.style.display = 'none';
+                document.getElementById('adminPassword').value = '';
+            }
+        }
+
+        // Função de login atualizada
+        loginButton.onclick = function() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === '30116011') { // Senha alterada conforme solicitado
+                window.location.href = 'admin.html';
+            } else {
+                alert('Senha incorreta!');
+            }
+        }
+
+        // Adicionar evento para tecla Enter no campo de senha
+        document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loginButton.click();
+            }
+        });
+    </script>
+</body>
+</html>
